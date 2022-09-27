@@ -1,12 +1,15 @@
 const express = require("express");
-const cors = require("cors");
+const router = express.Router();
 const userController = require("../controller/user");
 
-const verify = require("./verify");
+console.log("here in Routes");
+// const verify = require("./verify");
 
-const router = express.Router();
 
-router.post('/signup', cors(), userController.adminSignup);
-router.post('/signin', cors(), verify, userController.adminSignin);
+
+
+router.post("/signup", userController.userSignup);
+
+router.post("/signin", userController.userSignin);
 
 module.exports = router;

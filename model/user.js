@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const Joi = require("joi");
+
 
 const userSchema = new mongoose.Schema({
   firstName: {
@@ -22,15 +22,8 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: "admin",
   },
-});
+},{timestamps : true});
 
-module.exports = mongoose.model("user", userSchema);
+module.exports = mongoose.model("users", userSchema);
 
-
-exports.signupSchema = Joi.object({
-    firstName: Joi.string().min(3).max(20).required(),
-    lastName: Joi.string().min(3).max(20).required(),
-    email: Joi.string().min(6).required().email(),
-    password: Joi.string().min(6).max(16).required()
-})
 

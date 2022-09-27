@@ -2,68 +2,66 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const SECRET_KEY = process.env.TOKEN_SECRET;
 const userModel = require("../model/user");
-const signupSchema= require("../model/user");
+// const Joi = require("joi");
 
-exports.adminSignup = async (req, res) => {
-    const emailExist = await userModel.findOne({ email: req.body.email });
-
-    if (emailExist) {
-        res.status(409).send("This Email is already exist..!");
-        return;
-    }
-
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(req.body.password, salt);
-
+exports.userSignup = async (req, res) => {
     try {
-
-        const { error } = await signupSchema.validateAsync(req.body);
-        if (error) {
-            res.send(error.details[0].message);
-        } else {
-            const user = new userModel({
-                firstName: req.body.firstName,
-                lastName: req.body.lastName,
-                email: req.body.email,
-                password: hashedPassword.req.body.password
-            })
-
-            const saveAdmin = await user.save();
-
-            //Setting jwt token
-            const token = jwt.sign({email : saveAdmin.email, id : saveAdmin._id }, SECRET_KEY);
-            res.status(201).json({user: saveAdmin, token: token});
-
-            res.status(200).send("Admin SignUp is Completed");
+        // console.log("This is signup function");
+        const { email, password } = req.body;
+        const emailExist = await userModel.findOne({ email: email });
+        if (emailExist) {
+            res.status(409).json({ message: "Email Address Already Exists" });
+            return;
         }
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // try {
+
+        const saveUser = await userModel.create({
+            firstName: req.body.firstName,
+            lastName: req.body.lastName,
+            email: email,
+            password: hashedPassword,
+            roleName: req.body.roleName
+        })
+        
+
+        //Sending jwt token
+        const token = jwt.sign({ email: saveUser.email, id: saveUser._id }, SECRET_KEY);
+        res.status(201).json({ user: saveUser, token: token });
+
+        // res.status(200).json({ message: "Admin SignUp is Completed", data: saveUser });
+
     } catch (error) {
-        res.status(500).send(error);
+        console.log(error);
+        res.status(500).json({ message: "Here is Internal Server Error" });
     }
 };
 
-exports.adminSignin = async(req, res)=> {
-    const admin = await userModel.findOne({email: req.body.email});
+exports.userSignin = async (req, res) => {
+    const {email,password} = req.body;
+    const validUser = await userModel.findOne({ email: email });
 
-    if(!admin){
+    if (!validUser) {
         res.status(404).send("Admin not found please Sign Up !");
         return;
     }
 
     const validatePassword = await bcrypt.compare(
-        req.body.password,
-        user.password
+        password,
+        validUser.password
     )
 
-    if(!validatePassword){
+    if (!validatePassword) {
         res.status(403).send("Incorrect password Please Enter Valid Password !");
     }
 
-    try{
+    try {
         // JWT Token
-        // const token = jwt.sign({email : admin.email, id : admin._id }, SECRET_KEY);
-        res.status(200).json({user: admin, token: token});
+        const token = jwt.sign({email : validUser.email, id :validUser._id }, SECRET_KEY);
+        res.status(200).json({ user:validUser, token: token });
 
-    }catch(error){
+    } catch (error) {
         res.status(500).send(error);
     }
 };
