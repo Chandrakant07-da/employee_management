@@ -18,9 +18,9 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  roleName: {
-    type: String,
-    default: "admin",
+  role_Id: {
+    type: Number,
+    default: 1,
   },
 },{timestamps : true});
 
