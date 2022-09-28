@@ -21,7 +21,7 @@ exports.userSignup = async (req, res) => {
             role_Id: req.body.role_Id
         })
         //Sending jwt token
-        const token = jwt.sign({ email: saveUser.email, id: saveUser._id }, SECRET_KEY, {expiresIn: '1d'});
+        const token = jwt.sign({ email: saveUser.email, id: saveUser._id }, SECRET_KEY, { expiresIn: '1d' });
         res.status(201).json({ user: saveUser, token: token });
     } catch (error) {
         console.log(error);
@@ -70,7 +70,7 @@ exports.userSignin = async (req, res) => {
                     // JWT Token
                     const token = jwt.sign(
                         { email: validUser.email, _id: validUser._id, title: title, editPermission: editPermission },
-                        SECRET_KEY, {expiresIn: '1d'}
+                        SECRET_KEY, { expiresIn: '1d' }
                     );
                     res.status(200).json({ user: validUser, token: token });
                     // const token = jwt.sign({ email: validUser.email, id: validUser._id }, SECRET_KEY);
@@ -91,7 +91,7 @@ exports.userSignin = async (req, res) => {
 exports.logoutUser = async (req, res) => {
     try {
         console.log(req.user);
-        res.clearCookie(`token`);
+        // res.clearCookie(`token`);
         res.status(201).send("User Logout Successfully");
         await req.user.save();
     } catch (error) {
@@ -116,10 +116,10 @@ exports.addUser = async (req, res) => {
             role_Id: req.body.role_Id
         })
         const saveUser = await newUser.save()
-        res
+        return res
             .status(201)
             .json({ message: "New User Added Successfully", data: saveUser });
-        return;
+
     } catch (error) {
         console.log(error);
         res.status(500).json({ message: "Here is Internal Server Error" });

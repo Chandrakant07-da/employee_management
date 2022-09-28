@@ -20,9 +20,9 @@ const superAdmin = (userId, next, res) => {
       if (user) {
         if (user.user_permissions.permissions.edit === true) {
           next();
+          return;
         } else {
-         return res.status(403).json({ error: "Forbidden" });
-          
+         return res.status(403).json({ error: "Forbidden" }); 
         }
       }
     })
@@ -30,8 +30,8 @@ const superAdmin = (userId, next, res) => {
       res.status(500).json({ error: "Internal Server Error" });
     });
 };
-module.exports = superAdmin;
-// module.exports = (req, res, next) => {
-//   const userId = req.user._id;
-//   superAdmin(userId, next, res);
-// };
+// module.exports = superAdmin;
+module.exports = (req, res, next) => {
+  const userId = req.user._id;
+  superAdmin(userId, next, res);
+};

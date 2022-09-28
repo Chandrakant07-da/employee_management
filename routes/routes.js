@@ -10,9 +10,9 @@ router.post("/welcome", verify,authorization, (req, res) => {
 
 router.post("/signup", userController.userSignup);
 router.post("/signin", userController.userSignin);
-router.get("/logout", userController.logoutUser);
-router.post("/adduser", userController.addUser);
-router.get("/getuser/:id", userController.getUser);
-router.delete("/delete/:id", userController.deleteUser);
-router.put("/update/:id", userController.editUser);
+router.get("/logout",verify, userController.logoutUser);
+router.post("/adduser",verify, userController.addUser);
+router.get("/getuser/:id",verify, userController.getUser);
+router.delete("/delete/:id",verify, userController.deleteUser);
+router.put("/update/:id",verify, userController.editUser);
 module.exports = router;
