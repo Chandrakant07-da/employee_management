@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 const roleSchema = new mongoose.Schema({
-  role_Id: {
+  role_id: {
     type:Number,
     required: true,
   },

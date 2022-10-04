@@ -1,5 +1,7 @@
 const bcrypt = require("bcryptjs");
+const { number } = require("joi");
 const jwt = require("jsonwebtoken");
+const roleModel = require("../model/roles");
 const SECRET_KEY = process.env.TOKEN_SECRET;
 const userModel = require("../model/user");
 // const Joi = require("joi");
@@ -18,7 +20,7 @@ exports.userSignup = async (req, res) => {
             lastName: req.body.lastName,
             email: email,
             password: hashedPassword,
-            role_Id: req.body.role_Id
+            role_id: req.body.role_id
         })
         //Sending jwt token
         const token = jwt.sign({ email: saveUser.email, id: saveUser._id }, SECRET_KEY, { expiresIn: '1d' });
@@ -50,7 +52,7 @@ exports.userSignin = async (req, res) => {
                 {
                     $lookup: {
                         from: "roles",
-                        localField: "role_Id",
+                        localField: "role_id",
                         foreignField: "role_id",
                         as: "user_permissions",
                     },
@@ -113,7 +115,7 @@ exports.addUser = async (req, res) => {
             lastName: req.body.lastName,
             email: email,
             password: hashedPassword,
-            role_Id: req.body.role_Id
+            role_id: req.body.role_id
         })
         const saveUser = await newUser.save()
         return res
@@ -153,7 +155,7 @@ exports.editUser = async (req, res) => {
             {
                 firstName: req.body.firstName,
                 lastName: req.body.lastName,
-                role_Id: req.body.role_Id
+                role_id: req.body.role_id
             },
             (error) => {
                 if (error) {
@@ -166,4 +168,44 @@ exports.editUser = async (req, res) => {
     } catch (error) {
         res.status(500).json({ error: "Internal Server Error" });
     };
+};
+
+exports.search = async (req, res) => {
+    const key = req.params.key;
+    //checking result in roles collection
+    const role = await roleModel.findOne({ 'title': { $regex: key, $options: 'i' } });
+    if (!role) {
+        if (key.match(/^[a-zA-Z ]{2,30}$/)) {
+            const data = await userModel.find(
+                {
+                    "$or": [
+                        { "firstName": { $regex: key, $options: 'i' } },
+                        { "lastName": { $regex: key, $options: 'i' } }
+                    ]
+                }
+            );
+            res.status(201).send(data);
+            return;
+        } else if (key.match(/^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/)) {
+            const data = await userModel.find(
+                {
+                    "$or": [
+                        { "email": { $regex: key, $options: 'i' } },
+                    ]
+                }
+            );
+            res.status(201).send(data);
+            return;
+        }
+    } else {
+        const newkey =role.role_id;
+        //storing the result id to a varable named condition for searching it to user collection
+        const data = await userModel.find(
+            {
+                "role_id":newkey
+            }
+        );
+        res.status(201).send(data);
+        return;
+    }
 }
