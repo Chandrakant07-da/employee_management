@@ -1,4 +1,5 @@
 const bcrypt = require("bcryptjs");
+const { number } = require("joi");
 const jwt = require("jsonwebtoken");
 const roleModel = require("../model/roles");
 const SECRET_KEY = process.env.TOKEN_SECRET;
@@ -188,7 +189,7 @@ exports.search = async (req, res) => {
         } else if (key.match(/^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/)) {
             const data = await userModel.find(
                 {
-                    "$or":[
+                    "$or": [
                         { "email": { $regex: key, $options: 'i' } },
                     ]
                 }
@@ -197,17 +198,14 @@ exports.search = async (req, res) => {
             return;
         }
     } else {
-        const newkey = role.role_id;
-        console.log(newkey);
+        const newkey =role.role_id;
         //storing the result id to a varable named condition for searching it to user collection
         const data = await userModel.find(
             {
-                "$or": [
-                    { "role_id": { $regex:role.role_id } }
-                ]
+                "role_id":newkey
             }
         );
         res.status(201).send(data);
         return;
-    }   
+    }
 }
